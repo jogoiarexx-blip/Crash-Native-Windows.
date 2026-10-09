@@ -1,3 +1,33 @@
+# Crash Windows - Como baixar e testar (atualizado v2.14.0)
+
+**Sem instalar compiladores no PC:** o GitHub Actions compila os executaveis e entrega o ZIP portatil.
+
+## Teste disponivel neste repositorio PUBLICO: Crash reconstruido
+1. Clique na aba **Actions**: https://github.com/jogoiarexx-blip/Crash-Native-Windows./actions
+2. Escolha **Build Windows - Crash Native e Port GBA** e abra um build **verde**; se nao houver build, use **Run workflow**.
+3. Em **Artifacts**, baixe `CrashNative-Windows-x64`.
+4. Extraia o ZIP **uma vez**. Nao execute `.cmd` de compilacao.
+5. Coloque sua copia legitima da ROM em `input/crash.gba`.
+6. Execute `CrashNative.exe`. O Builder `PortGBABuilder-Windows-x64` e separado.
+
+## Teste do Crash Hybrid (ROM original + reconstrucao no mesmo EXE)
+O alvo `CrashHybrid.exe` foi adicionado, mas **nao esta compilado nem validado no Windows**. Para gerar o artifact `CrashHybrid-Windows-x64`, ainda precisa:
+
+- Alterar este repositorio para **Private** em Settings > General > Danger Zone.
+- Enviar a fonte C++ da traducao (sem ROM) para `build-input/Crash-Experimental-Generated.zip` **apenas depois de privado**.
+- Rodar novamente o workflow. Ele tentara produzir `CrashHybrid-Windows-x64`; so baixe se o job terminar verde.
+- No PC: extrair, colocar a ROM em `input/crash.gba`, abrir `CrashHybrid.exe`. **SIM** = traducao ARM/Thumb experimental; **NAO** = motor reconstruido. `--check` verifica a instalacao.
+
+O hibrido ainda **nao une fisica, saves ou gameplay** e **nao concluiu a fase** pelo runtime original. A execucao Windows ainda precisa de teste.
+
+## Port GBA Builder v2.14.0
+O workflow aplica `build-input/PortGBA-v2.14.0-CI-overlay.b64` aos fontes de v2.13.0. Foram adicionados:
+- Limitacao de frames da janela gerada ao ritmo do GBA (~59,73 FPS).
+- `package-windows`, que valida o arquivo PE Windows x64 e monta pasta portatil sem incluir ROM.
+- Testes Linux: **13/13** Builder. Projeto C++ da ROM regenerado e executavel de console compilado no Linux; janela Win32 ainda nao testada.
+
+---
+
 # Crash Native Windows — executáveis prontos pelo GitHub Actions
 
 Este repositório já contém a configuração de compilação Windows e o **pacote de fontes sem ROM** em `build-input/Crash-Windows-Source.zip`. Você não precisa instalar Visual Studio ou CMake para baixar os programas produzidos.
