@@ -75,6 +75,13 @@ jobs:
           name: PortGBABuilder-Windows-x64
           path: out/PortGBABuilder-Windows-x64/
           if-no-files-found: error
+      - name: Testar seletor do modo hibrido
+        shell: cmd
+        run: |
+          cl /nologo /utf-8 /std:c++17 /EHsc /O2 /MT hybrid\tests\mode_test.cpp /Fe:HybridModeSelfTest.exe /link /SUBSYSTEM:CONSOLE
+          if errorlevel 1 exit /b 1
+          HybridModeSelfTest.exe
+          if errorlevel 1 exit /b 1
       - name: Compilar ROM Original experimental (opcional - somente repositorio privado)
         if: github.event.repository.private == true && hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
         shell: pwsh
@@ -101,3 +108,30 @@ jobs:
           name: Crash-ROM-Original-Experimental-Windows-x64
           path: out/Crash-ROM-Original-Experimental.zip
           if-no-files-found: error
+      - name: Compilar CrashHybrid.exe (dois motores no mesmo processo, opcional)
+        if: github.event.repository.private == true && hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rebuilt = (Resolve-Path 'work/Crash').Path
+          $original = (Resolve-Path 'work/Experimental').Path
+          cmake -S hybrid -B build-hybrid -G "Visual Studio 17 2022" -A x64 "-DCRASH_REBUILT_DIR=$rebuilt" "-DCRASH_ORIGINAL_DIR=$original"
+          if ($LASTEXITCODE -ne 0) { throw 'Falhou a configuracao do CrashHybrid' }
+          cmake --build build-hybrid --config Release --target CrashHybrid --parallel 2
+          if ($LASTEXITCODE -ne 0) { throw 'Falhou a compilacao do CrashHybrid' }
+          $exe = 'build-hybrid/Release/CrashHybrid.exe'
+          if (!(Test-Path $exe)) { throw 'CrashHybrid.exe ausente' }
+          $dst='out/CrashHybrid-Windows-x64'
+          New-Item -ItemType Directory -Force -Path $dst, "$dst/input", "$dst/save", "$dst/assets/overrides" | Out-Null
+          Copy-Item $exe "$dst/CrashHybrid.exe"
+          Copy-Item 'work/Crash/display.ini' "$dst/display.ini"
+          'Coloque sua ROM legitima em input/crash.gba. Ao abrir CrashHybrid.exe selecione SIM (ROM original experimental) ou NAO (motor reconstruido). Ainda nao ha troca automatica de estado nem conclusao de fase validada.' | Set-Content "$dst/LEIA-ME.txt" -Encoding utf8
+          'Coloque aqui a sua copia legitima da ROM como crash.gba.' | Set-Content "$dst/input/COLOQUE-ROM-AQUI.txt" -Encoding utf8
+          'Os modos ainda nao compartilham o mesmo formato de save.' | Set-Content "$dst/save/LEIA-ME.txt" -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        if: github.event.repository.private == true && hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
+        with:
+          name: CrashHybrid-Windows-x64
+          path: out/CrashHybrid-Windows-x64/
+          if-no-files-found: error
+
