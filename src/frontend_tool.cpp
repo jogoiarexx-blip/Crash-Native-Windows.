@@ -1,3 +1,0 @@
-#include "frontend.hpp"
-#include <iostream>
-int main(int argc,char** argv){if(argc<2){std::cerr<<"usage: CrashFrontendTool WARP.bmp [PAUSE.bmp]\n";return 2;}crash::RunState s;for(int i=0;i<5;i++)s.finishLevel(i);s.finishLevel(20);s.lastLevel=5;s.bestTimeFrames[0]=5432;s.bestTimeFrames[3]=4977;auto rom=crash::read("input/crash.gba");auto art=crash::loadRomUiArt(rom);auto p=crash::renderLevelMap(s,5,&art);crash::bmp(argv[1],p,240,160);if(argc>2){auto q=crash::renderPauseScreen(&art,5);crash::bmp(argv[2],q,240,160);}std::cout<<"Frontend: sky="<<(art.menuSkyValid()?"original":"fallback")<<", level-select="<<(art.levelSelectValid()?"original":"fallback")<<", pause="<<(art.pauseMenuValid()?"original":"fallback")<<".\n";return 0;}
