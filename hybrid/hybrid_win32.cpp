@@ -10,11 +10,19 @@ int WINAPI WinMain(HINSTANCE instance,HINSTANCE previous,LPSTR arguments,int sho
   wchar_t path[32768]{};
   const DWORD n=GetModuleFileNameW(nullptr,path,32768);
   if(n && n<32768) SetCurrentDirectoryW(std::filesystem::path(path).parent_path().c_str());
+  auto mode=crash_hybrid::requestedMode(arguments?arguments:"");
+  if(mode==crash_hybrid::EngineMode::Check){
+    const bool romOk=std::filesystem::is_regular_file("input/crash.gba");
+    MessageBoxW(nullptr,romOk
+      ? L"ROM encontrada em input\\crash.gba. Abra CrashHybrid.exe para escolher o motor. A execucao ainda precisa ser testada."
+      : L"ROM ausente. Coloque sua copia legitima em input\\crash.gba. Nenhum compilador e necessario.",
+      L"Crash Hybrid - verificacao",MB_OK|(romOk?MB_ICONINFORMATION:MB_ICONWARNING));
+    return romOk?0:2;
+  }
   if(!std::filesystem::is_regular_file("input/crash.gba")) {
     MessageBoxW(nullptr,L"Coloque sua copia legitima da ROM em input\\crash.gba e abra CrashHybrid.exe novamente.",L"ROM necessaria",MB_OK|MB_ICONERROR);
     return 2;
   }
-  auto mode=crash_hybrid::requestedMode(arguments?arguments:"");
   if(mode==crash_hybrid::EngineMode::Ask) {
     const int answer=MessageBoxW(nullptr,
       L"Escolha o motor:\n\nSIM = ROM original traduzida (experimental)\nNAO = Crash reconstruido (mais jogavel)\nCANCELAR = sair\n\nSaves e estados permanecem independentes.",
