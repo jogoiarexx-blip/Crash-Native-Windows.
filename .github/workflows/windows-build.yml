@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/windows-build.yml"
       - "build-input/**"
+      - "hybrid/**"
 permissions:
   contents: read
 
