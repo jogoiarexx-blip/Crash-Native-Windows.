@@ -2,6 +2,14 @@
 
 Este repositório já contém a configuração de compilação Windows e o **pacote de fontes sem ROM** em `build-input/Crash-Windows-Source.zip`. Você não precisa instalar Visual Studio ou CMake para baixar os programas produzidos.
 
+## Crash Hibrido: um so EXE com dois motores (fase inicial)
+
+O codigo-fonte do **CrashHybrid.exe** esta em `hybrid/`. Ele incorpora o runtime ARM/Thumb original e o Crash reconstruido no **mesmo executavel**, com escolha no inicio: **SIM = original experimental; NAO = reconstruido**. Isso ainda **nao unifica** saves, fisica ou estado de gameplay; nao ha mudanca automatica de motores durante uma fase.
+
+O workflow tentara gerar o artifact `CrashHybrid-Windows-x64` **somente se** o repositorio for **privado** e contiver `build-input/Crash-Experimental-Generated.zip`, com o codigo C++ gerado e sem o arquivo da ROM. Nao publique esse codigo derivado da ROM em repositorios publicos.
+
+**Estado atual:** fonte do integrador publicada, teste de selecao feito localmente; compilacao do executavel hibrido no Windows ainda pendente. Mesmo compilado, ambos os modos precisam da sua copia legitima em `input/crash.gba`.
+
 ## Baixar o Crash Native reconstruído (jogável, mas separado da ROM traduzida)
 
 1. Abra a aba **Actions** do repositório.
