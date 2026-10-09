@@ -56,18 +56,24 @@ jobs:
           Copy-Item work/Crash/display.ini "$game/display.ini"
           Copy-Item build-builder/Release/PortGBABuilder.exe "$builder/PortGBABuilder.exe"
           'Crash reconstruido: forneca sua copia legitima em input/crash.gba. Basta abrir CrashNative.exe.' | Set-Content "$game/LEIA-ME.txt" -Encoding utf8
+          'Coloque aqui a sua copia legitima da ROM com o nome crash.gba. Nao inclua a ROM no repositorio.' | Set-Content "$game/input/COLOQUE-ROM-AQUI.txt" -Encoding utf8
+          'Os dados de save sao criados nesta pasta quando o jogo precisa.' | Set-Content "$game/save/LEIA-ME.txt" -Encoding utf8
+          'Coloque nesta pasta substituicoes graficas opcionais.' | Set-Content "$game/assets/overrides/LEIA-ME.txt" -Encoding utf8
           'Builder generico GBA. Nao e o jogo. O runtime original do Crash ainda e experimental.' | Set-Content "$builder/LEIA-ME.txt" -Encoding utf8
-          Compress-Archive -Path $game -DestinationPath out/CrashNative-Windows-x64.zip -Force
-          Compress-Archive -Path $builder -DestinationPath out/PortGBABuilder-Windows-x64.zip -Force
+          if (!(Test-Path "$game/CrashNative.exe")) { throw 'CrashNative.exe nao foi produzido' }
+          if (!(Test-Path "$builder/PortGBABuilder.exe")) { throw 'PortGBABuilder.exe nao foi produzido' }
+          Write-Host "Distribuicao pronta: pastas portateis com os executaveis. O GitHub compactara cada pasta em um unico artifact ZIP."
+          Get-FileHash "$game/CrashNative.exe" -Algorithm SHA256 | Format-List
+          Get-FileHash "$builder/PortGBABuilder.exe" -Algorithm SHA256 | Format-List
       - uses: actions/upload-artifact@v4
         with:
           name: CrashNative-Windows-x64
-          path: out/CrashNative-Windows-x64.zip
+          path: out/CrashNative-Windows-x64/
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: PortGBABuilder-Windows-x64
-          path: out/PortGBABuilder-Windows-x64.zip
+          path: out/PortGBABuilder-Windows-x64/
           if-no-files-found: error
       - name: Compilar ROM Original experimental (opcional)
         shell: pwsh
