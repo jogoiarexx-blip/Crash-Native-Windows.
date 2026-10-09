@@ -1,24 +1,33 @@
-# Crash Native Windows — compilação automática
+# Crash Native Windows — executáveis prontos pelo GitHub Actions
 
-Este projeto mantém o **Crash Native reconstruído**, compilado para Windows x64 no GitHub Actions. Não é o runtime experimental de recompilação ARM/Thumb da ROM.
+Este repositório já contém a configuração de compilação Windows e o **pacote de fontes sem ROM** em `build-input/Crash-Windows-Source.zip`. Você não precisa instalar Visual Studio ou CMake para baixar os programas produzidos.
 
-## Como baixar sem compilar
+## Baixar o Crash Native reconstruído (jogável, mas separado da ROM traduzida)
 
-Na página do repositório, abra **Actions → Build Crash Native Windows → última execução aprovada → Artifacts → CrashNative-Windows-x64**. Extraia o ZIP interno e dê dois cliques em `CrashNative.exe`.
+1. Abra a aba **Actions** do repositório.
+2. Escolha **Build Windows - Crash Native e Port GBA**.
+3. Abra uma execução com marca verde. Se nenhuma aparecer, use **Run workflow** e aguarde.
+4. Em **Artifacts**, baixe `CrashNative-Windows-x64`.
+5. Extraia o ZIP baixado e o ZIP que estiver dentro; coloque sua cópia legítima da ROM em `CrashNative-Windows-x64/input/crash.gba`.
+6. Abra **CrashNative.exe**. Não precisa compilar nada no PC.
 
-**Dependência atual:** o motor v0.68.0 ainda carrega `input/crash.gba` em tempo de execução. Não distribuímos a ROM. Você precisa fornecer uma cópia legítima da ROM original com esse nome, dentro da pasta `input`. Sem ela, o executável não consegue iniciar. Portanto, o port ainda **não é independente de dados da ROM**.
+O mesmo workflow entrega `PortGBABuilder-Windows-x64`, que é a ferramenta de tradução, **não o jogo**.
 
-A versão que traduz a CPU ARM/Thumb da ROM é experimental e não deve ser confundida com este motor jogável.
+## Runtime original ARM/Thumb do Crash (experimental)
 
-## Compilação no GitHub
+**ATENÇÃO:** o artefato `Crash-ROM-Original-Experimental-Windows-x64` só aparece quando o workflow encontra o pacote opcional `build-input/Crash-Experimental-Generated.zip`. Esse pacote precisa conter o **projeto C++ da ROM já gerado**, incluindo `CMakeLists.txt`, na raiz do ZIP. **Não deve conter** arquivo `.gba`, ROM nem save.
 
-- Workflow: `.github/workflows/windows-build.yml`, executado manualmente ou após commits em `main`.
-- `windows-2022` com MSVC x64 e runtime C/C++ estático (`/MT`).
-- Compila `CrashNative.exe`, executa testes sem ROM, gera ZIP portátil com `CrashNative.exe`, `display.ini`, `assets/overrides`, `input` e `save`.
-- Publicação de **GitHub Release** opcional: se criar a tag `v0.68.0`, o workflow anexa o ZIP à versão.
+**Esse pacote experimental ainda não foi enviado**: a tradução de instruções da ROM é derivada de conteúdo protegido por direitos autorais e este repositório foi criado como **público**. Antes de enviá-lo, altere a visibilidade em **Settings → General → Danger Zone → Change repository visibility → Private**. Ao mudar para privado, poderemos enviar esse pacote e tentar compilar a janela experimental `ACQE_ROM_Window.exe`.
 
-### Limitações explícitas
+O runtime original demonstrou abertura, mapa, início de Jungle Jam e resposta aos botões nos testes Linux. **A jogabilidade completa não foi validada**. Um build bem-sucedido não significa que a fase esteja totalmente funcional.
 
-- O workflow compila e testa recursos independentes da ROM, **mas não valida visualmente a interface ou gameplay**; é necessária execução em Windows com sua ROM.
-- Arquivos de ROM, saves e relatórios com capturas de material do jogo não são publicados neste repositório.
-- Não existe instalador MSI; é uma distribuição portátil por ZIP.
+## Se o build falhar
+
+Em **Actions**, abra a execução vermelha e selecione **Compilar CrashNative.exe** ou **Compilar e testar Builder** para ver o erro. Os builds Windows ainda precisam de validação com o MSVC.
+
+## Segurança e dependências
+
+- ROMs e saves não estão no repositório ou no ZIP de fontes.
+- O Crash Native reconstruído ainda carrega `input/crash.gba` quando executado; não é completamente independente da ROM.
+- O Builder é compilado a partir da v2.13.0 e o Crash reconstruído usa fontes v0.68.0.
+- O arquivo `build-input/Crash-Windows-Source.zip` foi verificado e não contém `.gba`, `.srm` ou executáveis pré-fabricados.
