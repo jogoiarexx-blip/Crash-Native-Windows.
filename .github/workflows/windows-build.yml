@@ -75,7 +75,8 @@ jobs:
           name: PortGBABuilder-Windows-x64
           path: out/PortGBABuilder-Windows-x64/
           if-no-files-found: error
-      - name: Compilar ROM Original experimental (opcional)
+      - name: Compilar ROM Original experimental (opcional - somente repositorio privado)
+        if: github.event.repository.private == true && hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -95,7 +96,7 @@ jobs:
           'Experimental: coloque sua ROM legitima em input/crash.gba. Gameplay completo nao validado.' | Set-Content "$dst/LEIA-ME.txt" -Encoding utf8
           Compress-Archive -Path $dst -DestinationPath out/Crash-ROM-Original-Experimental.zip -Force
       - uses: actions/upload-artifact@v4
-        if: hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
+        if: github.event.repository.private == true && hashFiles('build-input/Crash-Experimental-Generated.zip') != ''
         with:
           name: Crash-ROM-Original-Experimental-Windows-x64
           path: out/Crash-ROM-Original-Experimental.zip
