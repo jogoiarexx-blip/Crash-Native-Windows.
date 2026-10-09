@@ -21,6 +21,10 @@ jobs:
           $ErrorActionPreference = 'Stop'
           if (!(Test-Path 'build-input/Crash-Windows-Source.zip')) { throw 'Falta build-input/Crash-Windows-Source.zip (nao inclua arquivos .gba)' }
           Expand-Archive 'build-input/Crash-Windows-Source.zip' 'work' -Force
+          # Overlay tested Port GBA v2.14.0 sources (no ROM or generated game code).
+          $overlay = (Get-Content 'build-input/PortGBA-v2.14.0-CI-overlay.b64' -Raw).Trim()
+          [IO.File]::WriteAllBytes('portgba-overlay.zip',[Convert]::FromBase64String($overlay))
+          Expand-Archive 'portgba-overlay.zip' 'work/PortGBA' -Force
           foreach ($p in @('work/Crash/src/game_win32.cpp','work/Crash/src/png.cpp','work/PortGBA/CMakeLists.txt')) {
             if (!(Test-Path $p)) { throw "Fonte ausente: $p" }
           }
@@ -51,14 +55,14 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $game = 'out/CrashNative-Windows-x64'
           $builder = 'out/PortGBABuilder-Windows-x64'
-          New-Item -ItemType Directory -Force -Path $game, $builder, "$game/input", "$game/save", "$game/assets/overrides" | Out-Null
-          Copy-Item CrashNative.exe "$game/CrashNative.exe"
+          New-Item -ItemType Directory -Force -Path $builder | Out-Null
+          & 'build-builder/Release/PortGBABuilder.exe' package-windows CrashNative.exe $game --rom crash.gba
+          if ($LASTEXITCODE -ne 0) { throw 'Port GBA nao conseguiu validar o executavel ou preparar distribuicao' }
           Copy-Item work/Crash/display.ini "$game/display.ini"
-          Copy-Item build-builder/Release/PortGBABuilder.exe "$builder/PortGBABuilder.exe"
-          'Crash reconstruido: forneca sua copia legitima em input/crash.gba. Basta abrir CrashNative.exe.' | Set-Content "$game/LEIA-ME.txt" -Encoding utf8
-          'Coloque aqui a sua copia legitima da ROM com o nome crash.gba. Nao inclua a ROM no repositorio.' | Set-Content "$game/input/COLOQUE-ROM-AQUI.txt" -Encoding utf8
-          'Os dados de save sao criados nesta pasta quando o jogo precisa.' | Set-Content "$game/save/LEIA-ME.txt" -Encoding utf8
+          New-Item -ItemType Directory -Force -Path "$game/assets/overrides" | Out-Null
           'Coloque nesta pasta substituicoes graficas opcionais.' | Set-Content "$game/assets/overrides/LEIA-ME.txt" -Encoding utf8
+          Copy-Item build-builder/Release/PortGBABuilder.exe "$builder/PortGBABuilder.exe"
+          'Port GBA Builder v2.14.0: ferramentas de traducao e empacotamento. Nao e um jogo.' | Set-Content "$builder/LEIA-ME.txt" -Encoding utf8
           'Builder generico GBA. Nao e o jogo. O runtime original do Crash ainda e experimental.' | Set-Content "$builder/LEIA-ME.txt" -Encoding utf8
           if (!(Test-Path "$game/CrashNative.exe")) { throw 'CrashNative.exe nao foi produzido' }
           if (!(Test-Path "$builder/PortGBABuilder.exe")) { throw 'PortGBABuilder.exe nao foi produzido' }
